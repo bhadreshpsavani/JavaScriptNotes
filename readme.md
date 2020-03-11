@@ -2,7 +2,7 @@ Faster Online Compiler: [JsBin](https://jsbin.com/tediqajefo/edit?js,console,out
 
 Articles: [reference-and-copying-objetcs--arrays-in-javascript](https://dev.to/simo_benhida/reference-and-copying-objetcs--arrays-in-javascript-2h23)
 
-###WebPacks: 
+### WebPacks: 
 Webpack loaders let you load them directly in Javascript from files in the 'src' directory.
 
 Webpack enables this by parsing the contents of the CSS, image, and font files you want to import and making those contents available as values stored in a JavaScript module.
