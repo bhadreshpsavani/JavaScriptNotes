@@ -15,6 +15,7 @@ In a Javascript file, it would be safe to delete an unused imported library like
 ### Q/A:
 
 1. Which of these problems is React least suited to address?
+
 -Slow initial page loads leading to a high bounce rate.
 
 2. statements is true about React?
