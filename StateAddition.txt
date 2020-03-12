@@ -1,0 +1,166 @@
+************Product.js***********
+import React from 'react';
+import Filters from './Filters.js';
+import ProductTable from './ProductTable.js';
+import ProductForm from './ProductForm';
+
+var PRODUCTS = {
+  '1': {id: 1, category: 'Musical Instruments', price: '$459.99', stocked: true, name: 'Clarinet'},
+  '2': {id: 2, category: 'Musical Instruments', price: '$5,000', stocked: true, name: 'Harpsicord'},
+  '3': {id: 3, category: 'Musical Instruments', price: '$11,000', stocked: false, name: 'Fortepiano'},
+  '4': {id: 4, category: 'Furniture', price: '$799', stocked: true, name: 'Chaise Lounge'},
+  '5': {id: 5, category: 'Furniture', price: '$1,300', stocked: false, name: 'Dining Table'},
+  '6': {id: 6, category: 'Furniture', price: '$100', stocked: true, name: 'Bean Bag'}
+};
+
+class Products extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      filterText: '',
+      inStockOnly: false,
+      products: PRODUCTS
+    };
+
+  }
+  render() {
+    return (
+      <div>
+        <Filters
+          filterText={this.state.filterText}
+          inStockOnly={this.state.inStockOnly}
+        ></Filters>
+        <ProductTable
+          products={this.state.products}
+          filterText={this.state.filterText}
+          inStockOnly={this.state.inStockOnly}
+        ></ProductTable>
+        <ProductForm ></ProductForm>
+      </div>
+    );
+  }
+}
+
+export default Products;
+
+*************Filter.js****************
+import React from 'react';
+
+class Filters extends React.Component {
+  render() {
+    return (
+      <form>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={this.props.filterText}
+        />
+        <p>
+          <input
+            type="checkbox"
+            checked={this.props.inStockOnly}
+          />
+          &nbsp;
+          Only show products in stock
+        </p>
+      </form>
+    );
+  }
+}
+
+export default Filters;
+
+
+
+****************ProductTable.js****************
+import React from 'react';
+import ProductRow from './ProductRow.js';
+import SortableColumnHeader from './SortableColumnHeader.js';
+
+class ProductTable extends React.Component {
+  constructor(props) {
+    super(props);
+    this.sortByKeyAndOrder = this.sortByKeyAndOrder.bind(this);
+    this.state = {
+      sort: {
+        column: 'name',
+        direction: 'desc'
+      }
+    };
+  }
+  sortByKeyAndOrder(objectA, objectB) {
+    let isDesc = this.state.sort.direction === 'desc' ? 1 : -1;
+    let [a, b] = [objectA[this.state.sort.column], objectB[this.state.sort.column]];
+    if (this.state.sort.column === 'price') {
+      [a, b] = [a, b].map((value) => parseFloat(value.replace(/[^\d\.]/g, ''), 10));
+    }
+    if (a > b) {
+      return 1 * isDesc;
+    }
+    if (a < b) {
+      return -1 * isDesc;
+    }
+    return 0;
+  }
+  sortProducts() {
+    let productsAsArray = Object.keys(this.props.products).map((pid) => this.props.products[pid]);
+    return productsAsArray.sort(this.sortByKeyAndOrder);
+  }
+  render() {
+    var rows = [];
+    this.sortProducts().forEach((product) => {
+      if (product.name.indexOf(this.props.filterText) === -1 || (!product.stocked && this.props.inStockOnly)) {
+        return;
+      }
+      rows.push(<ProductRow product={product} key={product.id}></ProductRow>);
+    });
+
+    return (
+      <div>
+        <table>
+          <thead>
+            <tr>
+              <SortableColumnHeader
+                currentSort={this.state.sort}
+                column="name"
+              ></SortableColumnHeader>
+              <SortableColumnHeader
+                currentSort={this.state.sort}
+                column="price"
+              ></SortableColumnHeader>
+            </tr>
+          </thead>
+          <tbody>{rows}</tbody>
+        </table>
+      </div>
+    );
+  }
+}
+
+export default ProductTable;
+
+
+
+
+************SortableColumnHeader.js**************
+import React from 'react';
+import './SortableColumnHeader.css';
+
+class SortableColumnHeader extends React.Component {
+  render() {
+    let currentSort = this.props.currentSort.column === this.props.column ? this.props.currentSort.direction : false;
+    return(
+      <th>
+        {this.props.column}
+        <button
+          className={currentSort === 'asc' ? 'SortableColumnHeader-current' : ''}
+        >&#x25B2;</button>
+        <button
+          className={currentSort === 'desc' ? 'SortableColumnHeader-current' : ''}
+        >&#x25BC;</button>
+      </th>
+    );
+  }
+}
+
+export default SortableColumnHeader;
