@@ -38,3 +38,13 @@ In a Javascript file, it would be safe to delete an unused imported library like
 
 ### Concepts:
 - Progressive Enhancement: First build the static html page, then add java script element 
+
+
+## Practice Error Handling:
+- Add a value to the component's state that represents whether the error is present.
+
+- Add a validation function checks for the missing field, sets the error state, and returns a boolean expressing whether the form is valid.
+
+- Run the validation function when the user submits the form, and don't allow the save to occur if the form is not valid.
+
+- Add an error message in the view that will only appear if the error is present.
