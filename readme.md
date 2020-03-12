@@ -35,3 +35,6 @@ In a Javascript file, it would be safe to delete an unused imported library like
 - a templating language that compiles to Javascript.
 - a superset of Javascript.
 - mostly a syntactic convenience for building up javascript objects that describe DOM elements.
+
+### Concepts:
+- Progressive Enhancement: First build the static html page, then add java script element 
