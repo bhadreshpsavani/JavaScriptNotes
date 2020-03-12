@@ -1,0 +1,336 @@
+**************Product.js********************
+import React from 'react';
+import Filters from './Filters.js';
+import ProductTable from './ProductTable.js';
+import ProductForm from './ProductForm';
+
+var PRODUCTS = {
+  '1': {id: 1, category: 'Musical Instruments', price: '$459.99', stocked: true, name: 'Clarinet'},
+  '2': {id: 2, category: 'Musical Instruments', price: '$5,000', stocked: true, name: 'Harpsicord'},
+  '3': {id: 3, category: 'Musical Instruments', price: '$11,000', stocked: false, name: 'Fortepiano'},
+  '4': {id: 4, category: 'Furniture', price: '$799', stocked: true, name: 'Chaise Lounge'},
+  '5': {id: 5, category: 'Furniture', price: '$1,300', stocked: false, name: 'Dining Table'},
+  '6': {id: 6, category: 'Furniture', price: '$100', stocked: true, name: 'Bean Bag'}
+};
+
+class Products extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      filterText: '',
+      inStockOnly: false,
+      products: PRODUCTS
+    };
+
+    this.handleFilter = this.handleFilter.bind(this);
+    this.handleDestroy = this.handleDestroy.bind(this);
+    this.saveProduct = this.saveProduct.bind(this);
+  }
+  handleFilter(filterInput) {
+    this.setState(filterInput);
+  }
+  saveProduct(product) {
+    if (!product.id) {
+      product.id = new Date().getTime();
+    }
+    this.setState((prevState) => {
+      let products = prevState.products;
+      products[product.id] = product;
+      return { products };
+    });
+  }
+  handleDestroy(productId) {
+    this.setState((prevState) => {
+      let products = prevState.products;
+      delete products[productId];
+      return { products };
+    });
+  }
+  render() {
+    return (
+      <div>
+        <Filters
+          filterText={this.state.filterText}
+          inStockOnly={this.state.inStockOnly}
+          onFilter={this.handleFilter}
+        ></Filters>
+        <ProductTable
+          products={this.state.products}
+          filterText={this.state.filterText}
+          inStockOnly={this.state.inStockOnly}
+          onDestroy={this.handleDestroy}
+        ></ProductTable>
+        <ProductForm onSave={this.saveProduct} ></ProductForm>
+      </div>
+    );
+  }
+}
+
+export default Products;
+
+
+******************Filter.js*******************
+import React from 'react';
+
+class Filters extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+  }
+  handleChange(e) {
+    const value = e.target[e.target.type === "checkbox" ? "checked" : "value"]
+    const name = e.target.name;
+
+    this.props.onFilter({
+      [name]: value
+    });
+  }
+  render() {
+    return (
+      <form>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={this.props.filterText}
+          name="filterText"
+          onChange={this.handleChange}
+        />
+        <p>
+          <input
+            type="checkbox"
+            checked={this.props.inStockOnly}
+            name="inStockOnly"
+            onChange={this.handleChange}
+          />
+          &nbsp;
+          Only show products in stock
+        </p>
+      </form>
+    );
+  }
+}
+
+export default Filters;
+
+*********************ProductForm.js****************
+import React from 'react';
+
+const RESET_VALUES = {id: '', category: '', price: '', stocked: false, name: ''};
+
+class ProductForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSave = this.handleSave.bind(this);
+    this.state = {
+      product: Object.assign({}, RESET_VALUES),
+      errors: {}
+    };
+  }
+  handleChange(e) {
+    const target = e.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
+
+    this.setState((prevState) => {
+      prevState.product[name] = value;
+      return { product: prevState.product };
+    });
+  }
+  handleSave(e) {
+    this.props.onSave(this.state.product);
+    this.setState({
+      product: Object.assign({}, RESET_VALUES),
+      errors: {}
+    });
+    e.preventDefault();
+  }
+  render() {
+    return (
+      <form>
+        <h3>Enter a new product</h3>
+        <p>
+          <label>
+            Name
+            <br />
+            <input type="text" name="name" onChange={this.handleChange} value={this.state.product.name}/>
+          </label>
+        </p>
+        <p>
+          <label>
+            Category
+            <br />
+            <input type="text" name="category" onChange={this.handleChange} value={this.state.product.category} />
+          </label>
+        </p>
+        <p>
+          <label>
+            Price
+            <br />
+            <input type="text" name="price" onChange={this.handleChange} value={this.state.product.price} />
+          </label>
+        </p>
+        <p>
+          <label>
+            <input type="checkbox" name="stocked" onChange={this.handleChange} checked={this.state.product.stocked}/>
+            &nbsp;In stock?
+          </label>
+        </p>
+        <input type="submit" value="Save" onClick={this.handleSave}/>
+      </form>
+    );
+  }
+}
+
+export default ProductForm;
+
+************************ProductTable.js*************************
+import React from 'react';
+import ProductRow from './ProductRow.js';
+import SortableColumnHeader from './SortableColumnHeader.js';
+
+class ProductTable extends React.Component {
+  constructor(props) {
+    super(props);
+    this.sortByKeyAndOrder = this.sortByKeyAndOrder.bind(this);
+    this.handleSort = this.handleSort.bind(this);
+    this.handleDestroy = this.handleDestroy.bind(this);
+    this.state = {
+      sort: {
+        column: 'name',
+        direction: 'desc'
+      }
+    };
+  }
+  sortByKeyAndOrder(objectA, objectB) {
+    let isDesc = this.state.sort.direction === 'desc' ? 1 : -1;
+    let [a, b] = [objectA[this.state.sort.column], objectB[this.state.sort.column]];
+    if (this.state.sort.column === 'price') {
+      [a, b] = [a, b].map((value) => parseFloat(value.replace(/[^\d\.]/g, ''), 10));
+    }
+    if (a > b) {
+      return 1 * isDesc;
+    }
+    if (a < b) {
+      return -1 * isDesc;
+    }
+    return 0;
+  }
+  sortProducts() {
+    let productsAsArray = Object.keys(this.props.products).map((pid) => this.props.products[pid]);
+    return productsAsArray.sort(this.sortByKeyAndOrder);
+  }
+  handleDestroy(id) {
+    this.props.onDestroy(id);
+  }
+  handleSort(column, direction) {
+    this.setState({
+      sort: {
+        column: column,
+        direction: direction
+      }
+    });
+  }
+  render() {
+    var rows = [];
+    this.sortProducts().forEach((product) => {
+      if (product.name.indexOf(this.props.filterText) === -1 || (!product.stocked && this.props.inStockOnly)) {
+        return;
+      }
+      rows.push(<ProductRow product={product} key={product.id} onDestroy={this.handleDestroy}></ProductRow>);
+    });
+
+    return (
+      <div>
+        <table>
+          <thead>
+            <tr>
+              <SortableColumnHeader
+                onSort={this.handleSort}
+                currentSort={this.state.sort}
+                column="name"
+              ></SortableColumnHeader>
+              <SortableColumnHeader
+                onSort={this.handleSort}
+                currentSort={this.state.sort}
+                column="price"
+              ></SortableColumnHeader>
+            </tr>
+          </thead>
+          <tbody>{rows}</tbody>
+        </table>
+      </div>
+    );
+  }
+}
+
+export default ProductTable;
+
+
+
+*****************SortableColumnHeader.js*****************
+import React from 'react';
+import './SortableColumnHeader.css';
+
+class SortableColumnHeader extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleSort = this.handleSort.bind(this);
+  }
+  handleSort(e) {
+    this.props.onSort(this.props.column, e.target.name);
+  }
+  render() {
+    let currentSort = this.props.currentSort.column === this.props.column ? this.props.currentSort.direction : false;
+    return(
+      <th>
+        {this.props.column}
+        <button
+          onClick={this.handleSort}
+          className={currentSort === 'asc' ? 'SortableColumnHeader-current' : ''}
+          name='asc'
+        >&#x25B2;</button>
+        <button
+          onClick={this.handleSort}
+          className={currentSort === 'desc' ? 'SortableColumnHeader-current' : ''}
+          name='desc'
+        >&#x25BC;</button>
+      </th>
+    );
+  }
+}
+
+export default SortableColumnHeader;
+
+
+
+***************ProducRow*******************
+
+import React from 'react';
+
+class ProductRow extends React.Component {
+  constructor(props) {
+    super(props);
+    this.destroy = this.destroy.bind(this);
+  }
+  destroy() {
+    this.props.onDestroy(this.props.product.id);
+  }
+  render() {
+    var name = this.props.product.stocked ?
+      this.props.product.name :
+      <span style={{color: 'red'}}>
+        {this.props.product.name}
+      </span>;
+    return (
+      <tr>
+        <td>{name}</td>
+        <td>{this.props.product.price}</td>
+        <td><button onClick={this.destroy}>x</button></td>
+      </tr>
+    );
+  }
+}
+
+export default ProductRow;
+
