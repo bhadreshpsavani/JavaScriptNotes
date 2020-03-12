@@ -48,3 +48,12 @@ In a Javascript file, it would be safe to delete an unused imported library like
 - Run the validation function when the user submits the form, and don't allow the save to occur if the form is not valid.
 
 - Add an error message in the view that will only appear if the error is present.
+
+## Extend The Form Functionality:
+- Add "edit" buttons next to the "delete" buttons in  ProductRow.js .
+
+- When clicked, an edit button should set a value of state on the  <Products>  component, e.g.  this.state.formProduct , that indicates which product should populate the form  Since clicking different edit buttons should repurpose the form, you will need a way to update the form's state when the  formProduct  prop is changed. This doesn't happen automatically, but React provides a lifecycle hook that will allow you to call  setState  whenever a prop is changed. It's called componentWillReceiveProps.
+
+- Hitting save on the form should update the products model on the  <Products>  component, and then reset the form to blank values and allow it to create new products. You can use the product's id to keep track of which product to change in the data model, and you can use the absence of an id to indicate when a new product (with a new unique id!) should be created.
+
+- The point of this exercise is to make the form behave differently without adding components or changing the element markup in  <ProductForm> .
