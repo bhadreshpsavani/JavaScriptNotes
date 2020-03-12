@@ -1,0 +1,201 @@
+# product.js
+
+import React from 'react';
+import Filters from './Filters.js';
+import ProductForm from './ProductForm';
+import ProductTable from './ProductTable.js';
+
+var PRODUCTS = {
+  '1': {id: 1, category: 'Musical Instruments', price: '$459.99', stocked: true, name: 'Clarinet'},
+  '2': {id: 2, category: 'Musical Instruments', price: '$5,000', stocked: true, name: 'Cello'},
+  '3': {id: 3, category: 'Musical Instruments', price: '$11,000', stocked: false, name: 'Fortepiano'},
+  '4': {id: 4, category: 'Furniture', price: '$799', stocked: true, name: 'Chaise Lounge'},
+  '5': {id: 5, category: 'Furniture', price: '$1,300', stocked: false, name: 'Dining Table'},
+  '6': {id: 6, category: 'Furniture', price: '$100', stocked: true, name: 'Bean Bag'}
+};
+
+class Products extends React.Component {
+  render() {
+    return (
+      <div>
+        <Filters ></Filters>
+        <ProductTable products={PRODUCTS} ></ProductTable>
+        <ProductForm ></ProductForm>
+      </div>
+    );
+  }
+}
+
+export default Products;
+
+# Filter.js
+import React from 'react';
+
+class Filters extends React.Component {
+  render() {
+    return (
+      <form>
+        <input type="text" placeholder="Search..." />
+        <p>
+          <input type="checkbox" />&nbsp;Only show stocked products
+        </p>
+      </form>
+    );
+  }
+}
+
+export default Filters;
+
+# ProductTable.js
+
+import React from 'react';
+import ProductRow from './ProductRow.js';
+import ProductTableHeader from './ProductTableHeader.js';
+
+class ProductTable extends React.Component {
+  render() {
+    let productsAsArray = Object.keys(this.props.products).map((pid) => this.props.products[pid]);
+    let rows = [];
+
+    productsAsArray.forEach((product) => {
+      rows.push(
+        <ProductRow product={product} key={product.id} ></ProductRow>
+      );
+    });
+
+    return (
+      <div>
+        <table>
+          <thead>
+            <tr>
+              <ProductTableHeader column="name" ></ProductTableHeader>
+              <ProductTableHeader column="price" ></ProductTableHeader>
+            </tr>
+          </thead>
+          <tbody>{rows}</tbody>
+        </table>
+      </div>
+    );
+  }
+}
+
+export default ProductTable;
+
+# ProductTableHeader.js
+import React from 'react';
+import './ProductTableHeader.css';
+
+class ProductTableHeader extends React.Component {
+  render() {
+    return(
+      <th>
+        {this.props.column}
+        <button className="ProductTableHeader-current">&#x25B2;</button>
+        <button>&#x25BC;</button>
+      </th>
+    );
+  }
+}
+
+export default ProductTableHeader;
+
+# ProductTableHeader.css
+.ProductTableHeader-current {
+  background-color: #0ff;
+}
+
+
+
+# ProductRow.js
+import React from 'react';
+import './ProductRow.css';
+
+class ProductRow extends React.Component {
+  render() {
+    return (
+      <tr>
+        <td>
+          <span className={this.props.product.stocked ? '' : 'ProductRow-out-of-stock'}>
+            {this.props.product.name}
+          </span>
+        </td>
+        <td>
+           {this.props.product.price}
+        </td>
+        <td>
+           <button onClick={this.destroy} style={{color: 'red'}}>x</button>
+        </td>
+      </tr>
+    );
+  }
+}
+
+export default ProductRow;
+
+# ProductRow.css
+.ProductRow-out-of-stock {
+  color: red;
+}
+
+# ProductForm.js
+import React from 'react';
+
+class ProductForm extends React.Component {
+  render() {
+    return (
+      <form>
+        <h3>Enter a new product</h3>
+        <p>
+          <label>
+            Name
+            <br />
+            <input type="text" name="name" />
+          </label>
+        </p>
+        <p>
+          <label>
+            Category
+            <br />
+            <input type="text" name="category" />
+          </label>
+        </p>
+        <p>
+          <label>
+            Price
+            <br />
+            <input type="text" name="price" />
+          </label>
+        </p>
+        <p>
+          <label>
+            <input type="checkbox" name="stocked" />
+            &nbsp;In stock?
+          </label>
+        </p>
+        <input type="submit" value="Save" />
+      </form>
+    );
+  }
+}
+
+export default ProductForm;
+
+#App.js
+
+import React from 'react';
+import Products from './Products.js';
+
+class App extends React.Component {
+  render() {
+    return (
+      <div>
+        <header className="App-header"><h1>My React App</h1></header>
+        <section>
+          <Products ></Products>
+        </section>
+      </div>
+    );
+  }
+} 
+
+export default App;
